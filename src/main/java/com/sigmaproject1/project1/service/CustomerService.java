@@ -16,7 +16,7 @@ public class CustomerService {
     private final CustomerRepository repo;
 
     @Transactional
-    public CustomerDto addCustomer(final CustomerCreationRequest request) {
+    public CustomerDto createCustomer(final CustomerCreationRequest request) {
         String email = request.email().toLowerCase(Locale.ROOT).strip();
 
         if(repo.existsByEmail(email)) {

@@ -4,10 +4,9 @@ import com.sigmaproject1.project1.dto.CustomerDto;
 import com.sigmaproject1.project1.dto.request.CustomerCreationRequest;
 import com.sigmaproject1.project1.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,17 +14,15 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @PostMapping("/customers")
-    public ResponseEntity<CustomerDto> addCustomer(@RequestBody final CustomerCreationRequest request) {
-        CustomerDto customerDto = customerService.addCustomer(request);
+    public ResponseEntity<CustomerDto> createCustomer(@RequestBody final CustomerCreationRequest request) {
+        CustomerDto customerDto = customerService.createCustomer(request);
 
-        return ResponseEntity
-                .created(URI.create("/customers/"+customerDto.id()))
-                .body(customerDto);
+        return new ResponseEntity<>(customerDto,HttpStatus.CREATED);
     }
 
     @GetMapping("/customers/{id}")
     public ResponseEntity<CustomerDto> getCustomer(@PathVariable final Long id) {
-        return ResponseEntity.ok(customerService.getCustomer(id));
+        return ResponseEntity.ok(customerService.getCustomerDto(id));
     }
 
 }
