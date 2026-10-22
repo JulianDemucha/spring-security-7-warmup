@@ -34,11 +34,17 @@ public class CustomerService {
         );
     }
 
-    public CustomerDto getCustomer(final long id) {
+    public CustomerDto getCustomerDto(final long id) {
         return CustomerDto.toDto(
                 repo.findById(id).orElseThrow(
                         RuntimeException::new // todo: make custom exception
                 )
+        );
+    }
+
+    public Customer getCustomer(final long id) {
+        return repo.findById(id).orElseThrow(
+                RuntimeException::new // todo: make custom exception
         );
     }
 
