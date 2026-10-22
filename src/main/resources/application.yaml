@@ -1,3 +1,14 @@
 spring:
   application:
     name: project1
+  datasource:
+    url: jdbc:postgresql://localhost:5432/claims
+    username: app
+    password: app
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  flyway:
+    enabled: true
