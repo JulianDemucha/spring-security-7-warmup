@@ -23,7 +23,7 @@ public class CustomerService {
             throw new RuntimeException("Customer already exists"); // todo: make custom exception
         }
 
-        return CustomerDto.toDto(
+        return CustomerDto.from(
                 repo.save(
                 Customer.builder()
                         .firstName(request.firstName())
@@ -35,7 +35,7 @@ public class CustomerService {
     }
 
     public CustomerDto getCustomerDto(final long id) {
-        return CustomerDto.toDto(
+        return CustomerDto.from(
                 repo.findById(id).orElseThrow(
                         RuntimeException::new // todo: make custom exception
                 )

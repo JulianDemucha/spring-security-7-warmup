@@ -16,7 +16,7 @@ public record PolicyDto(
         BigDecimal sumInsured,
         Long customerId
 ){
-    public static PolicyDto toDto(Policy policy) {
+    public static PolicyDto from(Policy policy) {
         Customer customer = policy.getCustomer();
         if(customer == null)
             throw new IllegalArgumentException("Customer in the given policy is null");

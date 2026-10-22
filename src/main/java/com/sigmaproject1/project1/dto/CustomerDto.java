@@ -10,7 +10,7 @@ public record CustomerDto(
         String lastName,
         String email
 ){
-    public static CustomerDto toDto(Customer customer) {
+    public static CustomerDto from(Customer customer) {
         return CustomerDto.builder()
                 .id(customer.getId())
                 .firstName(customer.getFirstName())

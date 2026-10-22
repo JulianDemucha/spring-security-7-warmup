@@ -22,7 +22,7 @@ public class PolicyService {
 
         Customer customer = customerService.getCustomer(request.customerId());
 
-        return PolicyDto.toDto(policyRepository.save(
+        return PolicyDto.from(policyRepository.save(
                 Policy.builder()
                         .policyNumber(request.policyNumber())
                         .startDate(request.startDate())
@@ -34,7 +34,7 @@ public class PolicyService {
     }
 
     public PolicyDto getPolicy(final long policyId) {
-        return PolicyDto.toDto(
+        return PolicyDto.from(
                 policyRepository.findById(policyId).orElseThrow(
                         () -> new IllegalArgumentException("Policy doesn't exist id: " + policyId)
                 )
