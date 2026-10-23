@@ -4,6 +4,9 @@ import com.sigmaproject1.project1.dto.ClaimDto;
 import com.sigmaproject1.project1.dto.request.ClaimCreationRequest;
 import com.sigmaproject1.project1.entity.Claim;
 import com.sigmaproject1.project1.entity.Policy;
+import com.sigmaproject1.project1.exception.ClaimExceedsSumInsuredException;
+import com.sigmaproject1.project1.exception.ClaimNotFoundException;
+import com.sigmaproject1.project1.exception.IncidentOutsidePolicyPeriodException;
 import com.sigmaproject1.project1.repository.ClaimRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,11 +31,11 @@ public class ClaimService {
         LocalDate incidentDate = request.incidentDate();
 
         if(incidentDate.isAfter(policy.getEndDate()) || incidentDate.isBefore(policy.getStartDate()))
-            throw new RuntimeException("Incident date falls outside the time period specified in the policy"); //todo: make custom exception
+            throw new IncidentOutsidePolicyPeriodException(incidentDate, policy.getStartDate(), policy.getEndDate());
 
 
         if(request.claimedAmount().compareTo(policy.getSumInsured()) > 0)
-            throw new RuntimeException("Claimed amount exceeds the sum of insured amount"); //todo: make custom exception
+            throw new ClaimExceedsSumInsuredException(request.claimedAmount(), policy.getSumInsured(), policy.getId());
 
         return ClaimDto.from(claimRepository.save(
                 Claim.builder()
@@ -48,8 +51,8 @@ public class ClaimService {
     public ClaimDto getClaim(final long claimId) {
         return ClaimDto.from(
                 claimRepository.findById(claimId).orElseThrow(
-                        () -> new IllegalArgumentException("Claim doesn't exist id: " + claimId)
-                ) // todo make custom exception
+                        () -> new ClaimNotFoundException(claimId)
+                )
         );
     }
 

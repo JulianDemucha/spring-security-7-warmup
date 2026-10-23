@@ -3,6 +3,7 @@ package com.sigmaproject1.project1.controller;
 import com.sigmaproject1.project1.dto.PolicyDto;
 import com.sigmaproject1.project1.dto.request.PolicyCreationRequest;
 import com.sigmaproject1.project1.service.PolicyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ public class PolicyController {
     private final PolicyService policyService;
 
     @PostMapping("/policies")
-    public ResponseEntity<PolicyDto> createPolicy(@RequestBody final PolicyCreationRequest request) {
+    public ResponseEntity<PolicyDto> createPolicy(@RequestBody @Valid final PolicyCreationRequest request) {
         return new ResponseEntity<>(policyService.createPolicy(request), HttpStatus.CREATED);
     }
 

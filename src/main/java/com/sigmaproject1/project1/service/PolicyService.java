@@ -4,6 +4,8 @@ import com.sigmaproject1.project1.dto.PolicyDto;
 import com.sigmaproject1.project1.dto.request.PolicyCreationRequest;
 import com.sigmaproject1.project1.entity.Customer;
 import com.sigmaproject1.project1.entity.Policy;
+import com.sigmaproject1.project1.exception.PolicyAlreadyExistsException;
+import com.sigmaproject1.project1.exception.PolicyNotFoundException;
 import com.sigmaproject1.project1.repository.PolicyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ public class PolicyService {
             throw new IllegalArgumentException("Start date cannot be after end date");
 
         if(policyRepository.existsByPolicyNumber(request.policyNumber()))
-            throw new RuntimeException("Policy with number "+request.policyNumber()+" already exists"); //todo: make custom exception
+            throw new PolicyAlreadyExistsException(request.policyNumber());
 
         Customer customer = customerService.getCustomer(request.customerId());
 
@@ -39,15 +41,15 @@ public class PolicyService {
     public PolicyDto getPolicyDto(final long policyId) {
         return PolicyDto.from(
                 policyRepository.findById(policyId).orElseThrow(
-                        () -> new IllegalArgumentException("Policy doesn't exist id: " + policyId)
-                ) //todo: make custom exception
+                        () -> new PolicyNotFoundException(policyId)
+                )
         );
     }
 
     public Policy getPolicy(final long policyId) {
         return policyRepository.findById(policyId).orElseThrow(
-                () -> new IllegalArgumentException("Policy doesn't exist id: " + policyId)
-        );  //todo: make custom exception
+                () -> new PolicyNotFoundException(policyId)
+        );
     }
 
 }
