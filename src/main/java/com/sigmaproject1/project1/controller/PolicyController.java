@@ -20,7 +20,7 @@ public class PolicyController {
 
     @GetMapping("/policies/{id}")
     public ResponseEntity<PolicyDto> getPolicy(@PathVariable final Long id) {
-        return new ResponseEntity<>(policyService.getPolicy(id), HttpStatus.OK);
+        return new ResponseEntity<>(policyService.getPolicyDto(id), HttpStatus.OK);
     }
 
 }

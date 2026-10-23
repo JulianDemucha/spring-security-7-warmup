@@ -38,9 +38,10 @@ public class Claim {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal claimedAmount;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @NotNull
-    private ClaimStatus status;
+    private ClaimStatus status = ClaimStatus.NEW;
 
     @NotNull
     private Instant createdAt;
