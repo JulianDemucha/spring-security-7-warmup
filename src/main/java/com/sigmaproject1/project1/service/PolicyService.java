@@ -20,6 +20,9 @@ public class PolicyService {
         if(!request.endDate().isAfter(request.startDate()))
             throw new IllegalArgumentException("Start date cannot be after end date");
 
+        if(policyRepository.existsByPolicyNumber(request.policyNumber()))
+            throw new RuntimeException("Policy with number "+request.policyNumber()+" already exists"); //todo: make custom exception
+
         Customer customer = customerService.getCustomer(request.customerId());
 
         return PolicyDto.from(policyRepository.save(
