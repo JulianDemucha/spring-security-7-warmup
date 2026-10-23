@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +25,20 @@ public class ClaimService {
 
         Policy policy = policyService.getPolicy(request.policyId());
 
+        LocalDate incidentDate = request.incidentDate();
+
+        if(incidentDate.isAfter(policy.getEndDate()) || incidentDate.isBefore(policy.getStartDate()))
+            throw new RuntimeException("Incident date falls outside the time period specified in the policy"); //todo: make custom exception
+
+
+        if(request.claimedAmount().compareTo(policy.getSumInsured()) > 0)
+            throw new RuntimeException("Claimed amount exceeds the sum of insured amount"); //todo: make custom exception
+
         return ClaimDto.from(claimRepository.save(
                 Claim.builder()
                         .policy(policy)
                         .claimedAmount(request.claimedAmount())
-                        .description(request.description())
+                        .description(request.description().strip())
                         .incidentDate(request.incidentDate())
                         .createdAt(Instant.now(clock))
                         .build()

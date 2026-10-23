@@ -37,14 +37,14 @@ public class PolicyService {
         return PolicyDto.from(
                 policyRepository.findById(policyId).orElseThrow(
                         () -> new IllegalArgumentException("Policy doesn't exist id: " + policyId)
-                )
+                ) //todo: make custom exception
         );
     }
 
     public Policy getPolicy(final long policyId) {
         return policyRepository.findById(policyId).orElseThrow(
                 () -> new IllegalArgumentException("Policy doesn't exist id: " + policyId)
-        );
+        );  //todo: make custom exception
     }
 
 }
