@@ -40,9 +40,7 @@ public class PolicyService {
 
     public PolicyDto getPolicyDto(final long policyId) {
         return PolicyDto.from(
-                policyRepository.findById(policyId).orElseThrow(
-                        () -> new PolicyNotFoundException(policyId)
-                )
+                getPolicy(policyId)
         );
     }
 
