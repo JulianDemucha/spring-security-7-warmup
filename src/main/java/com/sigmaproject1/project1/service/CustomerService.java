@@ -22,7 +22,7 @@ public class CustomerService {
         String email = request.email().toLowerCase(Locale.ROOT).strip();
 
         if(Boolean.TRUE.equals(repo.existsByEmail(email)))
-            throw new CustomerAlreadyExistsException(email);
+            throw new CustomerAlreadyExistsException();
 
         return CustomerDto.from(
                 repo.save(

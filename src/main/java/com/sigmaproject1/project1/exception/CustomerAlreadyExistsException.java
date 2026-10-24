@@ -5,7 +5,7 @@ public class CustomerAlreadyExistsException extends RuntimeException {
         super("Customer already exists: " + id);
     }
 
-    public CustomerAlreadyExistsException(String email) {
-        super("Customer already exists: " + email);
+    public CustomerAlreadyExistsException() {
+        super("Customer with the provided email already exists");
     }
 }
