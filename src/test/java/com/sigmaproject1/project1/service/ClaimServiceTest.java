@@ -200,7 +200,7 @@ public class ClaimServiceTest {
         //Act and Assert
         assertThrows(
                 ClaimNotFoundException.class,
-                () -> claimService.getClaim(1L)
+                () -> claimService.getClaimDto(1L)
         );
     }
 

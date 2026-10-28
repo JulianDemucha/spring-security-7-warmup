@@ -25,7 +25,7 @@ public class ClaimController {
     @GetMapping("/claims/{id}")
     public ResponseEntity<ClaimDto> getClaim(@PathVariable final Long id) {
         return new ResponseEntity<>(
-                claimService.getClaim(id), HttpStatus.OK
+                claimService.getClaimDto(id), HttpStatus.OK
         );
     }
 }

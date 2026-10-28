@@ -48,14 +48,14 @@ public class ClaimService {
         ));
     }
 
-    public ClaimDto getClaim(final long claimId) {
-        return ClaimDto.from(
-                claimRepository.findById(claimId).orElseThrow(
-                        () -> new ClaimNotFoundException(claimId)
-                )
-        );
+    public ClaimDto getClaimDto(final long claimId) {
+        return ClaimDto.from(getClaim(claimId));
     }
 
-
+    public Claim getClaim(final long claimId) {
+        return claimRepository.findById(claimId).orElseThrow(
+                        () -> new ClaimNotFoundException(claimId)
+                );
+    }
 
 }
