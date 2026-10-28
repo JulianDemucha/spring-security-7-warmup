@@ -46,6 +46,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
+    @ExceptionHandler(InvalidClaimStatusTransitionException.class)
+    public ProblemDetail handleInvalidClaimStatusTransitionException(InvalidClaimStatusTransitionException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(PolicySumInsuredExceededException.class)
+    public ProblemDetail handlePolicySumInsuredExceededException(PolicySumInsuredExceededException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
     // 404 NOT FOUND
 
     @ExceptionHandler(ClaimNotFoundException.class)

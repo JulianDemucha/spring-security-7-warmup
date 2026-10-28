@@ -23,9 +23,30 @@ public class ClaimController {
     }
 
     @GetMapping("/claims/{id}")
-    public ResponseEntity<ClaimDto> getClaim(@PathVariable final Long id) {
+    public ResponseEntity<ClaimDto> getClaim(@PathVariable final long id) {
         return new ResponseEntity<>(
                 claimService.getClaimDto(id), HttpStatus.OK
+        );
+    }
+
+    @PostMapping("/claims/{id}/review")
+    public ResponseEntity<ClaimDto> moveToReview(@PathVariable final long id) {
+        return new ResponseEntity<>(
+                claimService.moveToReview(id), HttpStatus.OK
+        );
+    }
+
+    @PostMapping("/claims/{id}/reject")
+    public ResponseEntity<ClaimDto> rejectClaim(@PathVariable final long id) {
+        return new ResponseEntity<>(
+                claimService.rejectClaim(id), HttpStatus.OK
+        );
+    }
+
+    @PostMapping("/claims/{id}/approve")
+    public ResponseEntity<ClaimDto> approveClaim(@PathVariable final long id) {
+        return new ResponseEntity<>(
+                claimService.approveClaim(id), HttpStatus.OK
         );
     }
 }

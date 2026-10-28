@@ -4,14 +4,14 @@ import com.sigmaproject1.project1.dto.ClaimDto;
 import com.sigmaproject1.project1.dto.request.ClaimCreationRequest;
 import com.sigmaproject1.project1.entity.Claim;
 import com.sigmaproject1.project1.entity.Policy;
-import com.sigmaproject1.project1.exception.ClaimExceedsSumInsuredException;
-import com.sigmaproject1.project1.exception.ClaimNotFoundException;
-import com.sigmaproject1.project1.exception.IncidentOutsidePolicyPeriodException;
+import com.sigmaproject1.project1.enums.ClaimStatus;
+import com.sigmaproject1.project1.exception.*;
 import com.sigmaproject1.project1.repository.ClaimRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -56,6 +56,44 @@ public class ClaimService {
         return claimRepository.findById(claimId).orElseThrow(
                         () -> new ClaimNotFoundException(claimId)
                 );
+    }
+
+    @Transactional
+    public ClaimDto moveToReview(final long claimId) {
+        Claim claim = getClaim(claimId);
+        claim.moveToReview();
+        claimRepository.flush();
+        return ClaimDto.from(claim);
+    }
+
+    @Transactional
+    public ClaimDto rejectClaim(final long claimId) {
+        Claim claim = getClaim(claimId);
+        claim.rejectClaim();
+        claimRepository.flush();
+        return ClaimDto.from(claim);
+    }
+
+    @Transactional
+    public ClaimDto approveClaim(final long claimId) {
+        Claim claim = getClaim(claimId);
+        if(!claim.getStatus().canTransitionTo(ClaimStatus.APPROVED))
+            throw new InvalidClaimStatusTransitionException(claim.getStatus(),  ClaimStatus.APPROVED);
+
+        Policy policy = policyService.getPolicyForUpdate(claim.getPolicy().getId()); //Lock
+
+        BigDecimal alreadyApproved = claimRepository.sumApprovedClaimAmountByPolicyId(policy.getId());
+        if(alreadyApproved.add(claim.getClaimedAmount()).compareTo(policy.getSumInsured()) > 0)
+            throw new PolicySumInsuredExceededException(
+                    claim.getClaimedAmount(),
+                    policy.getSumInsured(),
+                    alreadyApproved,
+                    policy.getId()
+            );
+
+        claim.approveClaim();
+        claimRepository.flush();
+        return ClaimDto.from(claim);
     }
 
 }

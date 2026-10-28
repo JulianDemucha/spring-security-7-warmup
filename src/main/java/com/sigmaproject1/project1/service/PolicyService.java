@@ -50,4 +50,11 @@ public class PolicyService {
         );
     }
 
+    //With lock
+    public Policy getPolicyForUpdate(final long policyId) {
+        return policyRepository.findByIdForUpdate(policyId).orElseThrow(
+                () -> new PolicyNotFoundException(policyId)
+        );
+    }
+
 }

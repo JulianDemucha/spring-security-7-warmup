@@ -1,6 +1,7 @@
 package com.sigmaproject1.project1.entity;
 
 import com.sigmaproject1.project1.enums.ClaimStatus;
+import com.sigmaproject1.project1.exception.InvalidClaimStatusTransitionException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -48,4 +49,23 @@ public class Claim {
 
     @Version
     private Long version;
+
+    public void moveToReview(){
+        transitionTo(ClaimStatus.IN_REVIEW);
+    }
+
+    public void rejectClaim(){
+        transitionTo(ClaimStatus.REJECTED);
+    }
+
+    public void approveClaim(){
+        transitionTo(ClaimStatus.APPROVED);
+    }
+
+    private void transitionTo(ClaimStatus target){
+        if(!status.canTransitionTo(target))
+            throw new InvalidClaimStatusTransitionException(status, target);
+
+        this.status = target;
+    }
 }
