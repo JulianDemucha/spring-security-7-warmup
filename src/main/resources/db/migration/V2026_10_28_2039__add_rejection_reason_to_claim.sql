@@ -1,0 +1,1 @@
+ALTER TABLE claim ADD COLUMN rejection_reason VARCHAR(255);

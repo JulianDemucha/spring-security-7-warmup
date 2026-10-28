@@ -50,12 +50,21 @@ public class Claim {
     @Version
     private Long version;
 
+    private String rejectionReason;
+
     public void moveToReview(){
         transitionTo(ClaimStatus.IN_REVIEW);
     }
 
-    public void rejectClaim(){
+    public void rejectClaim(String reason) {
+        if(reason.isBlank())
+            throw new IllegalArgumentException("Reason must not be null nor blank");
+
+        if(reason.length() < 3 || reason.length() > 100)
+            throw new IllegalArgumentException("Reason must be between 3 and 100 characters");
+
         transitionTo(ClaimStatus.REJECTED);
+        this.rejectionReason = reason;
     }
 
     public void approveClaim(){

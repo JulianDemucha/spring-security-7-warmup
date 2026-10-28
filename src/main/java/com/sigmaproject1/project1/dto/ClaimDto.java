@@ -16,6 +16,7 @@ public record ClaimDto(
         BigDecimal claimedAmount,
         ClaimStatus status,
         Instant createdAt,
+        String rejectionReason,
         Long version
 ){
 
@@ -30,6 +31,7 @@ public record ClaimDto(
                 .status(claim.getStatus())
                 .createdAt(claim.getCreatedAt())
                 .version(claim.getVersion())
+                .rejectionReason(claim.getRejectionReason())
                 .build();
     }
 }

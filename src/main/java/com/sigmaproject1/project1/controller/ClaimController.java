@@ -37,9 +37,9 @@ public class ClaimController {
     }
 
     @PostMapping("/claims/{id}/reject")
-    public ResponseEntity<ClaimDto> rejectClaim(@PathVariable final long id) {
+    public ResponseEntity<ClaimDto> rejectClaim(@PathVariable final long id, @RequestParam String reason) {
         return new ResponseEntity<>(
-                claimService.rejectClaim(id), HttpStatus.OK
+                claimService.rejectClaim(id, reason), HttpStatus.OK
         );
     }
 

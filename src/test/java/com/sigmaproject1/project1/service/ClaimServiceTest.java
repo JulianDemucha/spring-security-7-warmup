@@ -316,17 +316,19 @@ public class ClaimServiceTest {
                 .status(ClaimStatus.APPROVED)
                 .build();
 
+        String reason = "reason";
+
         when(claimRepository.findById(claim.getId())).thenReturn(Optional.of(claim));
 
         //Act and Assert
         assertThrows(
                 InvalidClaimStatusTransitionException.class,
-                () -> claimService.rejectClaim(1L)
+                () -> claimService.rejectClaim(1L,  reason)
         );
     }
 
     @Test
-    void moveToReview_dataIsValid_rejectsAndReturnsClaim() {
+    void rejectClaim_dataIsValid_rejectsAndReturnsClaim() {
         //Arrange
         Policy policy = Policy.builder().id(1L).build();
 
@@ -336,13 +338,16 @@ public class ClaimServiceTest {
                 .status(ClaimStatus.IN_REVIEW)
                 .build();
 
+        String reason = "no mony left sory man";
+
         when(claimRepository.findById(claim.getId())).thenReturn(Optional.of(claim));
 
         //Act and Assert
-        ClaimDto result = claimService.rejectClaim(1L);
+        ClaimDto result = claimService.rejectClaim(1L, reason);
 
         assertEquals(ClaimStatus.REJECTED, result.status());
         assertEquals(ClaimStatus.REJECTED, claim.getStatus());
+        assertEquals(reason, result.rejectionReason());
     }
 
 

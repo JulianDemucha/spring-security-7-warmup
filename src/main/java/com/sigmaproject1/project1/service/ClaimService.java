@@ -67,9 +67,9 @@ public class ClaimService {
     }
 
     @Transactional
-    public ClaimDto rejectClaim(final long claimId) {
+    public ClaimDto rejectClaim(final long claimId, final String reason) {
         Claim claim = getClaim(claimId);
-        claim.rejectClaim();
+        claim.rejectClaim(reason);
         claimRepository.flush();
         return ClaimDto.from(claim);
     }
