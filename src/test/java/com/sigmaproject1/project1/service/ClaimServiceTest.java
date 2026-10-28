@@ -1,18 +1,17 @@
 package com.sigmaproject1.project1.service;
 
+import com.sigmaproject1.project1.dto.ClaimDto;
 import com.sigmaproject1.project1.dto.request.ClaimCreationRequest;
 import com.sigmaproject1.project1.entity.Claim;
 import com.sigmaproject1.project1.entity.Policy;
-import com.sigmaproject1.project1.exception.ClaimExceedsSumInsuredException;
-import com.sigmaproject1.project1.exception.ClaimNotFoundException;
-import com.sigmaproject1.project1.exception.IncidentOutsidePolicyPeriodException;
+import com.sigmaproject1.project1.enums.ClaimStatus;
+import com.sigmaproject1.project1.exception.*;
 import com.sigmaproject1.project1.repository.ClaimRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,18 +35,16 @@ public class ClaimServiceTest {
     @Mock
     private PolicyService policyService;
 
-    @Mock
     private final Clock clock = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
 
-    @InjectMocks
     private ClaimService claimService;
-
-    private final ArgumentCaptor<Claim> claimCaptor = ArgumentCaptor.forClass(Claim.class);
 
     @BeforeEach
     void setUp() {
         claimService = new ClaimService(claimRepository, policyService, clock);
     }
+
+    private final ArgumentCaptor<Claim> claimCaptor = ArgumentCaptor.forClass(Claim.class);
 
     @Nested
     class CreateClaimTests {
@@ -173,7 +170,6 @@ public class ClaimServiceTest {
 
             when(policyService.getPolicy(1L)).thenReturn(policy);
             when(claimRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-            when(Instant.now(clock)).thenReturn(incidentDate.atStartOfDay(ZoneOffset.UTC).toInstant());
 
             //Act
             claimService.createClaim(request);
@@ -186,6 +182,7 @@ public class ClaimServiceTest {
             assertEquals(request.description(), savedClaim.getDescription());
             assertEquals(request.incidentDate(), savedClaim.getIncidentDate());
             assertEquals(request.policyId(), savedClaim.getPolicy().getId());
+            assertEquals(Instant.parse("2026-01-01T00:00:00Z"), savedClaim.getCreatedAt());
 
 
         }
@@ -203,6 +200,151 @@ public class ClaimServiceTest {
                 () -> claimService.getClaimDto(1L)
         );
     }
+
+    @Nested
+    class ApproveClaimTests{
+
+        @Test
+        void approveClaim_claimStatusNotInReview_throwsException(){
+            //Arrange
+            Claim claim = Claim.builder()
+                    .status(ClaimStatus.NEW)
+                    .build();
+            when(claimRepository.findById(1L)).thenReturn(Optional.of(claim));
+
+            //Act and Assert
+            assertThrows(
+                    InvalidClaimStatusTransitionException.class,
+                    () -> claimService.approveClaim(1L)
+            );
+        }
+
+        @Test
+        void approveClaim_policySumInsuredExceeded_throwsException(){
+            //Arrange
+            Policy policy = Policy.builder()
+                    .id(1L)
+                    .sumInsured(BigDecimal.TEN)
+                    .build();
+
+            Claim claim = Claim.builder()
+                    .id(1L)
+                    .status(ClaimStatus.IN_REVIEW)
+                    .policy(policy)
+                    .claimedAmount(BigDecimal.TWO)
+                    .build();
+
+            when(claimRepository.findById(claim.getId())).thenReturn(Optional.of(claim));
+            when(policyService.getPolicyForUpdate(policy.getId())).thenReturn(policy);
+            when(claimRepository.sumApprovedClaimAmountByPolicyId(policy.getId())).thenReturn(BigDecimal.valueOf(9));
+
+            //Act and Assert
+            assertThrows(
+                    PolicySumInsuredExceededException.class,
+                    () -> claimService.approveClaim(1L)
+            );
+        }
+
+        @Test
+        void approveClaim_dataIsValid_approvesAndReturnsClaim() {
+            //Arrange
+            Policy policy = Policy.builder()
+                    .id(1L)
+                    .sumInsured(BigDecimal.TEN)
+                    .build();
+
+            Claim claim = Claim.builder()
+                    .id(1L)
+                    .status(ClaimStatus.IN_REVIEW)
+                    .policy(policy)
+                    .claimedAmount(BigDecimal.TWO)
+                    .build();
+
+            when(claimRepository.findById(claim.getId())).thenReturn(Optional.of(claim));
+            when(policyService.getPolicyForUpdate(policy.getId())).thenReturn(policy);
+            when(claimRepository.sumApprovedClaimAmountByPolicyId(policy.getId())).thenReturn(BigDecimal.ONE);
+
+            ClaimDto result = claimService.approveClaim(1L);
+
+            assertEquals(ClaimStatus.APPROVED, result.status());
+            assertEquals(ClaimStatus.APPROVED, claim.getStatus());
+        }
+
+    }
+
+    @Test
+    void moveToReview_claimStatusNotNew_throwsException(){
+        //Arrange
+        Claim claim = Claim.builder()
+                .id(1L)
+                .status(ClaimStatus.REJECTED)
+                .build();
+
+        when(claimRepository.findById(claim.getId())).thenReturn(Optional.of(claim));
+
+        //Act and Assert
+        assertThrows(
+                InvalidClaimStatusTransitionException.class,
+                () -> claimService.moveToReview(1L)
+        );
+    }
+
+    @Test
+    void moveToReview_dataIsValid_movesToReviewAndReturnsClaim() {
+        //Arrange
+        Policy policy = Policy.builder().id(1L).build();
+        Claim claim = Claim.builder()
+                .id(1L)
+                .policy(policy)
+                .status(ClaimStatus.NEW)
+                .build();
+
+        when(claimRepository.findById(claim.getId())).thenReturn(Optional.of(claim));
+
+        //Act and Assert
+        ClaimDto result = claimService.moveToReview(1L);
+
+        assertEquals(ClaimStatus.IN_REVIEW, result.status());
+        assertEquals(ClaimStatus.IN_REVIEW, claim.getStatus());
+    }
+
+    @Test
+    void rejectClaim_claimStatusInReview_throwsException(){
+        //Arrange
+        Claim claim = Claim.builder()
+                .id(1L)
+                .status(ClaimStatus.APPROVED)
+                .build();
+
+        when(claimRepository.findById(claim.getId())).thenReturn(Optional.of(claim));
+
+        //Act and Assert
+        assertThrows(
+                InvalidClaimStatusTransitionException.class,
+                () -> claimService.rejectClaim(1L)
+        );
+    }
+
+    @Test
+    void moveToReview_dataIsValid_rejectsAndReturnsClaim() {
+        //Arrange
+        Policy policy = Policy.builder().id(1L).build();
+
+        Claim claim = Claim.builder()
+                .id(1L)
+                .policy(policy)
+                .status(ClaimStatus.IN_REVIEW)
+                .build();
+
+        when(claimRepository.findById(claim.getId())).thenReturn(Optional.of(claim));
+
+        //Act and Assert
+        ClaimDto result = claimService.rejectClaim(1L);
+
+        assertEquals(ClaimStatus.REJECTED, result.status());
+        assertEquals(ClaimStatus.REJECTED, claim.getStatus());
+    }
+
 
 }
 
