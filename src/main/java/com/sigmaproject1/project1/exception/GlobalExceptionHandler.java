@@ -1,6 +1,7 @@
 package com.sigmaproject1.project1.exception;
 import lombok.NonNull;
 import org.springframework.http.*;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -71,6 +72,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(PolicyAlreadyExistsException.class)
     public ProblemDetail handlePolicyAlreadyExistsException(PolicyAlreadyExistsException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ProblemDetail handleObjectOptimisticLockingFailure(ObjectOptimisticLockingFailureException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                "The resource was modified by another request. Reload it and try again.");
     }
 
     // 500 INTERNAL SERVER ERROR
