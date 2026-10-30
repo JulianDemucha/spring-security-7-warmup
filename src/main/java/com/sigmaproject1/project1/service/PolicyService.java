@@ -57,4 +57,8 @@ public class PolicyService {
         );
     }
 
+    public Boolean existsById(final long policyId) {
+        return policyRepository.existsById(policyId);
+    }
+
 }

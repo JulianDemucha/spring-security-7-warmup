@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -94,6 +95,12 @@ public class ClaimService {
         claim.approveClaim();
         claimRepository.flush();
         return ClaimDto.from(claim);
+    }
+
+    public List<ClaimDto> getClaimsByPolicyId(final long policyId) {
+        if(!policyService.existsById(policyId))
+            throw new PolicyNotFoundException(policyId);
+        return claimRepository.findAllAsDtoByPolicyId(policyId);
     }
 
 }
