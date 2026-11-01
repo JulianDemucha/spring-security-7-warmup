@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
@@ -34,4 +34,12 @@ public class Policy {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+
+    // Lombok fills in the rest of the builder
+    public static class PolicyBuilder {
+        public PolicyBuilder sumInsured(BigDecimal sumInsured) {
+            this.sumInsured = sumInsured == null ? null : sumInsured.setScale(2);
+            return this;
+        }
+    }
 }

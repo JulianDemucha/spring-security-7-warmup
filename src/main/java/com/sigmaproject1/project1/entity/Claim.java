@@ -13,7 +13,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
@@ -76,5 +76,12 @@ public class Claim {
             throw new InvalidClaimStatusTransitionException(status, target);
 
         this.status = target;
+    }
+
+    public static class ClaimBuilder {
+        public ClaimBuilder claimedAmount(BigDecimal claimedAmount) {
+            this.claimedAmount = claimedAmount == null ? null : claimedAmount.setScale(2);
+            return this;
+        }
     }
 }

@@ -157,7 +157,7 @@ public class ClaimServiceTest {
                     1L,
                     "ok ok",
                     incidentDate,
-                    BigDecimal.valueOf(1000000)
+                    new BigDecimal("1000000.00")
             );
 
             Policy policy = Policy

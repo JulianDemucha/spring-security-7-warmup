@@ -51,7 +51,7 @@ public class PolicyServiceTest {
                     "123-4567-8910",
                     startDate,
                     endDate,
-                    BigDecimal.ONE,
+                    new BigDecimal("1.00"),
                     1L
             );
 
@@ -95,7 +95,7 @@ public class PolicyServiceTest {
                     "123-4567-8910",
                     startDate,
                     endDate,
-                    BigDecimal.ONE,
+                    new BigDecimal("1.00"),
                     1L
             );
 
