@@ -3,9 +3,6 @@ package com.sigmaproject1.project1.integration;
 import com.sigmaproject1.project1.entity.Claim;
 import com.sigmaproject1.project1.enums.ClaimStatus;
 import com.sigmaproject1.project1.repository.ClaimRepository;
-import com.sigmaproject1.project1.repository.CustomerRepository;
-import com.sigmaproject1.project1.repository.PolicyRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +18,6 @@ public class ClaimTransitionsIntegrationTest extends BaseIT {
 
     @Autowired
     private ClaimRepository claimRepository;
-
-    @Autowired
-    private PolicyRepository policyRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @BeforeEach
-    void cleanDatabase() {
-        claimRepository.deleteAll();
-        policyRepository.deleteAll();
-        customerRepository.deleteAll();
-    }
 
     @Nested
     class Approve {

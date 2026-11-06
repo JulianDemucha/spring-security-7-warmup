@@ -1,6 +1,6 @@
 package com.sigmaproject1.project1.enums;
 
 public enum Role {
-    USER,
+    CLIENT,
     ADMIN
 }

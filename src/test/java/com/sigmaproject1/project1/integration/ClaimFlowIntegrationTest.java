@@ -4,7 +4,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.sigmaproject1.project1.repository.ClaimRepository;
 import com.sigmaproject1.project1.repository.CustomerRepository;
 import com.sigmaproject1.project1.repository.PolicyRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -23,13 +22,6 @@ public class ClaimFlowIntegrationTest extends BaseIT {
 
     @Autowired
     private CustomerRepository customerRepository;
-
-    @BeforeEach
-    void cleanDatabase() {
-        claimRepository.deleteAll();
-        policyRepository.deleteAll();
-        customerRepository.deleteAll();
-    }
 
     @Test
     void claimFlowIntegrationTest() throws Exception {
