@@ -16,9 +16,12 @@ app:
       same-site: Strict
       ttl: 7d
       http-only: true
-
   xsrf:
     secret: ${XSRF_SECRET}
+
+  admin:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
 spring:
   application:
     name: project1
