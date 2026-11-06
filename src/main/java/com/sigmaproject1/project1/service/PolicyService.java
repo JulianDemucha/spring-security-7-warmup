@@ -25,7 +25,7 @@ public class PolicyService {
         if(policyRepository.existsByPolicyNumber(request.policyNumber()))
             throw new PolicyAlreadyExistsException(request.policyNumber());
 
-        Customer customer = customerService.getCustomer(request.customerId());
+        Customer customer = customerService.getById(request.customerId());
 
         return PolicyDto.from(policyRepository.save(
                 Policy.builder()

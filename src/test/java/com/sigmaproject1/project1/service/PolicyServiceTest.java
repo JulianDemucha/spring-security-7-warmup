@@ -104,7 +104,7 @@ public class PolicyServiceTest {
                     .build();
 
             when(policyRepository.existsByPolicyNumber(request.policyNumber())).thenReturn(false);
-            when(customerService.getCustomer(request.customerId())).thenReturn(customer);
+            when(customerService.getById(request.customerId())).thenReturn(customer);
             when(policyRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             //Act

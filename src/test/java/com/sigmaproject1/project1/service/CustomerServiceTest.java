@@ -92,7 +92,7 @@ class CustomerServiceTest {
         //Act and Assert
         assertThrows(
                 CustomerNotFoundException.class,
-                () -> customerService.getCustomer(1L)
+                () -> customerService.getById(1L)
         );
     }
 

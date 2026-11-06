@@ -37,11 +37,11 @@ public class CustomerService {
 
     public CustomerDto getCustomerDto(final long id) {
         return CustomerDto.from(
-                getCustomer(id)
+                getById(id)
         );
     }
 
-    public Customer getCustomer(final long id) {
+    public Customer getById(final long id) {
         return repo.findById(id).orElseThrow(
                 () -> new CustomerNotFoundException(id)
         );
