@@ -1,5 +1,6 @@
 package com.sigmaproject1.project1.controller;
 
+import com.sigmaproject1.project1.dto.RefreshTokenDto;
 import com.sigmaproject1.project1.dto.UserDto;
 import com.sigmaproject1.project1.dto.request.LoginRequest;
 import com.sigmaproject1.project1.service.AuthService;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +23,21 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final CookieFacadeService cookieFacadeService;
 
+    @PostMapping("/refresh")
+    public ResponseEntity<Void> refreshToken(
+            @CookieValue(name = "${app.jwt.refresh-cookie.name}", required = false) String refreshTokenRaw,
+            final HttpServletResponse response
+    ) {
+        Optional<RefreshTokenDto> rtd = refreshTokenService.rotate(refreshTokenRaw);
+
+        if (rtd.isEmpty()) {
+            cookieFacadeService.clearCookies(response);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        cookieFacadeService.setCookiesAfterRefresh(response, rtd.get());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(
