@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerController {
     private final CustomerService customerService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/customers")
     public ResponseEntity<CustomerDto> createCustomer(@RequestBody @Valid final CustomerCreationRequest request) {
         CustomerDto customerDto = customerService.createCustomer(request);
@@ -21,6 +23,7 @@ public class CustomerController {
         return new ResponseEntity<>(customerDto,HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/customers/{id}")
     public ResponseEntity<CustomerDto> getCustomer(@PathVariable final Long id) {
         return ResponseEntity.ok(customerService.getCustomerDto(id));

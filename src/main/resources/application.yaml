@@ -1,3 +1,20 @@
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    issuer: claims-app
+    audience: claims-app-api
+    cookie-secure: ${COOKIE_SECURE:true}
+    access-cookie:
+      name: access-token
+      path: /
+      same-site: Strict
+      ttl: 15m
+    refresh-cookie:
+      name: refresh-token
+      path: /auth
+      same-site: Strict
+      ttl: 7d
+
 spring:
   application:
     name: project1

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 public class ClaimController {
     private final ClaimService claimService;
 
+    // todo: check if user is owner or admin
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/claims")
     public ResponseEntity<ClaimDto> createClaim(@Valid @RequestBody final ClaimCreationRequest claimCreationRequest) {
         return new ResponseEntity<>(
@@ -22,6 +25,8 @@ public class ClaimController {
         );
     }
 
+    // todo: check if user is owner or admin
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/claims/{id}")
     public ResponseEntity<ClaimDto> getClaim(@PathVariable final long id) {
         return new ResponseEntity<>(
@@ -29,6 +34,7 @@ public class ClaimController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/claims/{id}/review")
     public ResponseEntity<ClaimDto> moveToReview(@PathVariable final long id) {
         return new ResponseEntity<>(
@@ -36,6 +42,7 @@ public class ClaimController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/claims/{id}/reject")
     public ResponseEntity<ClaimDto> rejectClaim(@PathVariable final long id, @RequestParam String reason) {
         return new ResponseEntity<>(
@@ -43,6 +50,7 @@ public class ClaimController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/claims/{id}/approve")
     public ResponseEntity<ClaimDto> approveClaim(@PathVariable final long id) {
         return new ResponseEntity<>(
