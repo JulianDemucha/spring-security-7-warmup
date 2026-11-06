@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Locale;
+import static com.sigmaproject1.project1.utils.EmailUtils.normalizeEmail;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ public class CustomerService {
 
     @Transactional
     public CustomerDto createCustomer(final CustomerCreationRequest request) {
-        String email = request.email().toLowerCase(Locale.ROOT).strip();
+        String email = normalizeEmail(request.email());
 
         if(Boolean.TRUE.equals(repo.existsByEmail(email)))
             throw new CustomerAlreadyExistsException();
