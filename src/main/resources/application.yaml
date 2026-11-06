@@ -9,11 +9,13 @@ app:
       path: /
       same-site: Strict
       ttl: 15m
+      http-only: true
     refresh-cookie:
       name: refresh-token
       path: /auth
       same-site: Strict
       ttl: 7d
+      http-only: true
 
   xsrf:
     secret: ${XSRF_SECRET}
