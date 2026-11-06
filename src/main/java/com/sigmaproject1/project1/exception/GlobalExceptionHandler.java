@@ -17,6 +17,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // 401 UNAUTHORIZED
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ProblemDetail handleInvalidCredentialsException(InvalidCredentialsException e){
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ProblemDetail handleInvalidRefreshTokenException(InvalidRefreshTokenException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
