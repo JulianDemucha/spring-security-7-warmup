@@ -18,7 +18,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/customers")
     public ResponseEntity<CustomerDto> createCustomer(@RequestBody @Valid final CustomerCreationRequest request) {
-        CustomerDto customerDto = customerService.createCustomer(request);
+        CustomerDto customerDto = customerService.createCustomerAndGetDto(request);
 
         return new ResponseEntity<>(customerDto,HttpStatus.CREATED);
     }

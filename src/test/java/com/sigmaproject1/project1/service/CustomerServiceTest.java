@@ -49,7 +49,7 @@ class CustomerServiceTest {
             // Act and Assert
             assertThrows(
                     CustomerAlreadyExistsException.class,
-                    () -> customerService.createCustomer(request)
+                    () -> customerService.createCustomerAndGetDto(request)
             );
             verify(customerRepository, never()).save(any());
         }
@@ -73,7 +73,7 @@ class CustomerServiceTest {
             );
 
             //Act
-            customerService.createCustomer(request);
+            customerService.createCustomerAndGetDto(request);
 
             //Assert
             Customer saved = customerCaptor.getValue();

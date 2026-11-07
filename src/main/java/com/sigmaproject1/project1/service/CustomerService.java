@@ -18,20 +18,29 @@ public class CustomerService {
     private final CustomerRepository repo;
 
     @Transactional
-    public CustomerDto createCustomer(final CustomerCreationRequest request) {
+    public CustomerDto createCustomerAndGetDto(final CustomerCreationRequest request) {
+        return CustomerDto.from(
+            createAndSave(request)
+        );
+    }
+
+    @Transactional
+    public Customer createCustomer(final CustomerCreationRequest request) {
+        return createAndSave(request);
+    }
+
+    private Customer createAndSave(final CustomerCreationRequest request) {
         String email = normalizeEmail(request.email());
 
-        if(Boolean.TRUE.equals(repo.existsByEmail(email)))
+        if (Boolean.TRUE.equals(repo.existsByEmail(email)))
             throw new CustomerAlreadyExistsException();
 
-        return CustomerDto.from(
-                repo.save(
+        return repo.save(
                 Customer.builder()
                         .firstName(request.firstName())
                         .lastName(request.lastName())
                         .email(email)
                         .build()
-                )
         );
     }
 
@@ -44,6 +53,12 @@ public class CustomerService {
     public Customer getById(final long id) {
         return repo.findById(id).orElseThrow(
                 () -> new CustomerNotFoundException(id)
+        );
+    }
+
+    public Customer getByEmail(final String email) {
+        return repo.findByEmail(email).orElseThrow(
+                () -> new CustomerNotFoundException()
         );
     }
 
