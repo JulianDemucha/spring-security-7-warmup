@@ -5,6 +5,7 @@ import com.sigmaproject1.project1.entity.User;
 import com.sigmaproject1.project1.enums.Role;
 import com.sigmaproject1.project1.repository.UserRepository;
 import com.sigmaproject1.project1.service.JwtService;
+import com.sigmaproject1.project1.service.XsrfTokenService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class JwtServiceIntegrationTest extends BaseIT {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private XsrfTokenService xsrfTokenService;
+
     @Test
     @WithAnonymousUser
     void issueJwtToken_validUser_tokenHasClaimsAndIsAcceptedByApi() throws Exception {
@@ -53,8 +57,14 @@ public class JwtServiceIntegrationTest extends BaseIT {
         assertEquals(List.of("ADMIN"), jwt.getClaimAsStringList("roles"));
         assertEquals(familyId.toString(), jwt.getClaimAsString("sid"));
 
+        String xsrfToken = xsrfTokenService.generateSigned(familyId);
+
         mockMvc.perform(post("/claims/1/approve")
-                        .cookie(new Cookie(jwtProperties.accessCookie().name(), token)))
+                        .cookie(
+                                new Cookie(jwtProperties.accessCookie().name(), token),
+                                new Cookie("XSRF-TOKEN", xsrfToken)
+                        )
+                        .header("X-XSRF-TOKEN", xsrfToken))
                 .andExpect(status().isNotFound());
     }
 }

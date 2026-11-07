@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -44,5 +45,25 @@ public class XsrfTokenService {
         return encoder.encodeToString(mac.doFinal(
                 (refreshTokenFamilyId + "." + random).getBytes(UTF_8)
         ));
+    }
+
+    public boolean isValid(final String header, final String cookie, final String familyId) {
+        if (header == null || cookie == null || familyId == null)
+            return false;
+
+        if (!MessageDigest.isEqual(header.getBytes(UTF_8), cookie.getBytes(UTF_8)))
+            return false;
+
+        int dot = header.indexOf(".");
+        if (dot <= 0)
+            return false;
+
+        String uuid = header.substring(0, dot);
+
+        String expected = sign(familyId, uuid);
+
+        String signature = header.substring(dot + 1);
+
+        return MessageDigest.isEqual(expected.getBytes(UTF_8), signature.getBytes(UTF_8));
     }
 }
