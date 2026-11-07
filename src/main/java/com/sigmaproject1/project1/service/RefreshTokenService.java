@@ -31,7 +31,7 @@ public class RefreshTokenService {
 
         RefreshToken rf = repo.findForRotationByTokenHash(hashToken(tokenRaw)) // with lock
                 .orElseThrow(
-                        () -> new InvalidRefreshTokenException()
+                        InvalidRefreshTokenException::new
                 );
         if(rf.getExpiresAt().isBefore(Instant.now()))
             throw new InvalidRefreshTokenException();
@@ -98,6 +98,15 @@ public class RefreshTokenService {
         return rawToken;
     }
 
+    @Transactional
+    public void revokeFamily(String rawToken) {
+        if(rawToken == null)
+            return;
+
+        repo.findByTokenHash(hashToken(rawToken)).ifPresent(
+                rt -> repo.revokeAllByFamilyId(rt.getFamilyId(), Instant.now())
+        );
+    }
 
     private void revokeFamily(final UUID familyId) {
         repo.revokeAllByFamilyId(familyId, Instant.now());

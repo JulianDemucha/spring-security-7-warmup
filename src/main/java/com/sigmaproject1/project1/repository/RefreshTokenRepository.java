@@ -28,4 +28,6 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
             AND rt.revokedAt IS NULL
             """)
     void revokeAllByFamilyId(@Param("familyId") UUID familyId, @Param("now") Instant now);
+
+    Optional<RefreshToken> findByTokenHash(String tokenHash);
 }

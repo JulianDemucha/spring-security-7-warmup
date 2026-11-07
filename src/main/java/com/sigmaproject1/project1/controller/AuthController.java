@@ -25,7 +25,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<Void> refreshToken(
-            @CookieValue(name = "${app.jwt.refresh-cookie.name}", required = false) String refreshTokenRaw,
+            @CookieValue(name = "${app.jwt.refresh-cookie.name}", required = false) final String refreshTokenRaw,
             final HttpServletResponse response
     ) {
         Optional<RefreshTokenDto> rtd = refreshTokenService.rotate(refreshTokenRaw);
@@ -41,7 +41,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(
-            @RequestBody @Valid LoginRequest request,
+            @RequestBody @Valid final LoginRequest request,
             final HttpServletResponse response
     ) {
         UserDto user = authService.login(request);
@@ -51,6 +51,16 @@ public class AuthController {
         );
 
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @CookieValue(name = "${app.jwt.refresh-cookie.name}", required = false) final String refreshTokenRaw,
+            final HttpServletResponse response
+    ) {
+        refreshTokenService.revokeFamily(refreshTokenRaw);
+        cookieFacadeService.clearCookies(response);
+         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }
