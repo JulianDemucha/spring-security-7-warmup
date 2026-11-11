@@ -6,6 +6,7 @@ import com.sigmaproject1.project1.entity.Customer;
 import com.sigmaproject1.project1.exception.CustomerAlreadyExistsException;
 import com.sigmaproject1.project1.exception.CustomerNotFoundException;
 import com.sigmaproject1.project1.repository.CustomerRepository;
+import com.sigmaproject1.project1.security.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,7 @@ public class CustomerService {
     @Transactional
     public CustomerDto createCustomerAndGetDto(final CustomerCreationRequest request) {
         return CustomerDto.from(
-            createAndSave(request)
+                createAndSave(request)
         );
     }
 
@@ -44,9 +45,14 @@ public class CustomerService {
         );
     }
 
-    public CustomerDto getCustomerDto(final long id) {
+    public CustomerDto getCustomerDto(final long customerId, final UserContext userContext) {
+        if (userContext.isAdmin())
+            return CustomerDto.from(
+                    getById(customerId)
+            );
+
         return CustomerDto.from(
-                getById(id)
+                getByIdAndUserId(customerId, userContext.userId())
         );
     }
 
@@ -58,7 +64,13 @@ public class CustomerService {
 
     public Customer getByEmail(final String email) {
         return repo.findByEmail(email).orElseThrow(
-                () -> new CustomerNotFoundException()
+                CustomerNotFoundException::new
+        );
+    }
+
+    public Customer getByIdAndUserId(final long customerId, final long userId) {
+        return repo.findByIdAndUserId(customerId, userId).orElseThrow(
+                () -> new CustomerNotFoundException(customerId)
         );
     }
 

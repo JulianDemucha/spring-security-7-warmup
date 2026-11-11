@@ -8,14 +8,15 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
 
     @Query("""
-            SELECT COALESCE(SUM(c.claimedAmount), 0)
-                FROM Claim c WHERE c.policy.id = :policyId
-                    AND c.status = ClaimStatus.APPROVED
-    """)
+           SELECT COALESCE(SUM(c.claimedAmount), 0)
+           FROM Claim c WHERE c.policy.id = :policyId
+           AND c.status = ClaimStatus.APPROVED
+           """)
     BigDecimal sumApprovedClaimAmountByPolicyId(@Param("policyId") long policyId);
 
     @Query("""
@@ -27,4 +28,12 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
            WHERE c.policy.id =:policyId
            """)
     List<ClaimDto> findAllAsDtoByPolicyId(@Param("policyId") long policyId);
+
+    @Query("""
+           SELECT c FROM Claim c
+           JOIN c.policy p
+           JOIN User u ON p.customer = u.customer
+           WHERE c.id = :claimId AND u.id = :userId
+           """)
+    Optional<Claim> findByIdAndOwnerUserId(@Param("claimId") long claimId, @Param("userId") long userId);
 }

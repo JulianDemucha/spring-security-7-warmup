@@ -1,6 +1,7 @@
 package com.sigmaproject1.project1.service;
 
 import com.sigmaproject1.project1.dto.ClaimDto;
+import com.sigmaproject1.project1.security.UserContext;
 import com.sigmaproject1.project1.dto.request.ClaimCreationRequest;
 import com.sigmaproject1.project1.entity.Claim;
 import com.sigmaproject1.project1.entity.Policy;
@@ -25,17 +26,22 @@ public class ClaimService {
     private final Clock clock;
 
     @Transactional
-    public ClaimDto createClaim(final ClaimCreationRequest request) {
+    public ClaimDto createClaim(final ClaimCreationRequest request, final UserContext userContext) {
+        Policy policy;
 
-        Policy policy = policyService.getPolicy(request.policyId());
+        if (userContext.isAdmin()) {
+            policy = policyService.getPolicy(request.policyId());
+        } else {
+            policy = policyService.getPolicyByIdAndOwner(request.policyId(), userContext.userId());
+        }
 
         LocalDate incidentDate = request.incidentDate();
 
-        if(incidentDate.isAfter(policy.getEndDate()) || incidentDate.isBefore(policy.getStartDate()))
+        if (incidentDate.isAfter(policy.getEndDate()) || incidentDate.isBefore(policy.getStartDate()))
             throw new IncidentOutsidePolicyPeriodException(incidentDate, policy.getStartDate(), policy.getEndDate());
 
 
-        if(request.claimedAmount().compareTo(policy.getSumInsured()) > 0)
+        if (request.claimedAmount().compareTo(policy.getSumInsured()) > 0)
             throw new ClaimExceedsSumInsuredException(request.claimedAmount(), policy.getSumInsured(), policy.getId());
 
         return ClaimDto.from(claimRepository.save(
@@ -49,14 +55,25 @@ public class ClaimService {
         ));
     }
 
-    public ClaimDto getClaimDto(final long claimId) {
-        return ClaimDto.from(getClaim(claimId));
+    public ClaimDto getClaimDto(final long claimId, final UserContext userContext) {
+        if (userContext.isAdmin()) {
+            return ClaimDto.from(getClaim(claimId));
+        }
+
+        return ClaimDto.from(
+                claimRepository.findByIdAndOwnerUserId(
+                        claimId,
+                        userContext.userId()
+                ).orElseThrow(
+                        () -> new ClaimNotFoundException(claimId)
+                )
+        );
     }
 
     public Claim getClaim(final long claimId) {
         return claimRepository.findById(claimId).orElseThrow(
-                        () -> new ClaimNotFoundException(claimId)
-                );
+                () -> new ClaimNotFoundException(claimId)
+        );
     }
 
     @Transactional
@@ -78,13 +95,13 @@ public class ClaimService {
     @Transactional
     public ClaimDto approveClaim(final long claimId) {
         Claim claim = getClaim(claimId);
-        if(!claim.getStatus().canTransitionTo(ClaimStatus.APPROVED))
-            throw new InvalidClaimStatusTransitionException(claim.getStatus(),  ClaimStatus.APPROVED);
+        if (!claim.getStatus().canTransitionTo(ClaimStatus.APPROVED))
+            throw new InvalidClaimStatusTransitionException(claim.getStatus(), ClaimStatus.APPROVED);
 
         Policy policy = policyService.getPolicyForUpdate(claim.getPolicy().getId()); //Lock
 
         BigDecimal alreadyApproved = claimRepository.sumApprovedClaimAmountByPolicyId(policy.getId());
-        if(alreadyApproved.add(claim.getClaimedAmount()).compareTo(policy.getSumInsured()) > 0)
+        if (alreadyApproved.add(claim.getClaimedAmount()).compareTo(policy.getSumInsured()) > 0)
             throw new PolicySumInsuredExceededException(
                     claim.getClaimedAmount(),
                     policy.getSumInsured(),
@@ -97,9 +114,13 @@ public class ClaimService {
         return ClaimDto.from(claim);
     }
 
-    public List<ClaimDto> getClaimsByPolicyId(final long policyId) {
-        if(!policyService.existsById(policyId))
-            throw new PolicyNotFoundException(policyId);
+    public List<ClaimDto> getClaimsByPolicyId(final long policyId, final UserContext userContext) {
+        if (userContext.isAdmin()) {
+            if (Boolean.FALSE.equals(policyService.existsById(policyId)))
+                throw new PolicyNotFoundException(policyId);
+        } else {
+            policyService.getPolicyByIdAndOwner(policyId, userContext.userId());
+        }
         return claimRepository.findAllAsDtoByPolicyId(policyId);
     }
 

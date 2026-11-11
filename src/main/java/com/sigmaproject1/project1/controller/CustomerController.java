@@ -2,6 +2,8 @@ package com.sigmaproject1.project1.controller;
 
 import com.sigmaproject1.project1.dto.CustomerDto;
 import com.sigmaproject1.project1.dto.request.CustomerCreationRequest;
+import com.sigmaproject1.project1.security.CurrentUser;
+import com.sigmaproject1.project1.security.UserContext;
 import com.sigmaproject1.project1.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +25,12 @@ public class CustomerController {
         return new ResponseEntity<>(customerDto,HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/customers/{id}")
-    public ResponseEntity<CustomerDto> getCustomer(@PathVariable final Long id) {
-        return ResponseEntity.ok(customerService.getCustomerDto(id));
+    public ResponseEntity<CustomerDto> getCustomer(
+            @PathVariable final Long id,
+            @CurrentUser final UserContext userContext
+    ) {
+        return ResponseEntity.ok(customerService.getCustomerDto(id, userContext));
     }
 
 }

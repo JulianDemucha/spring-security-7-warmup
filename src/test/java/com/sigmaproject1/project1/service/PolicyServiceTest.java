@@ -128,8 +128,16 @@ public class PolicyServiceTest {
         when(policyRepository.findById(any())).thenReturn(Optional.empty());
 
         //Act and Assert
-        assertThrows(PolicyNotFoundException.class, () ->  policyService.getPolicy(1L));
+        assertThrows(PolicyNotFoundException.class, () -> policyService.getPolicy(1L));
     }
 
+    @Test
+    void getPolicyByIdAndOwner_policyDoesNotBelongToUser_throwsException(){
+        //Arrange
+        when(policyRepository.findByIdAndOwnerUserId(any(), any())).thenReturn(Optional.empty());
+
+        //Act and Assert
+        assertThrows(PolicyNotFoundException.class, () -> policyService.getPolicyByIdAndOwner(1L, 1L));
+    }
 
 }

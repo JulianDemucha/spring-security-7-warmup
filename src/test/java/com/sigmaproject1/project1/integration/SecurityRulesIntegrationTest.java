@@ -56,17 +56,17 @@ public class SecurityRulesIntegrationTest extends BaseIT {
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
-    void getPolicy_asClient_returns403() throws Exception {
+    @WithJwtUser(role = Role.CLIENT)
+    void getPolicy_asClient_passesSecurityAndReturns404() throws Exception {
         mockMvc.perform(get("/policies/1"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
-    void getCustomer_asClient_returns403() throws Exception {
+    @WithJwtUser(role = Role.CLIENT)
+    void getCustomer_asClient_passesSecurityAndReturns404() throws Exception {
         mockMvc.perform(get("/customers/1"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
     }
 
     @Test

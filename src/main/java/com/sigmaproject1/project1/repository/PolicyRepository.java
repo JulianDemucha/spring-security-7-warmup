@@ -16,4 +16,11 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
     @Query("SELECT p FROM Policy p WHERE p.id = :id")
     Optional<Policy> findByIdForUpdate(@Param("id") long id);
 
+    @Query("""
+            SELECT p FROM Policy p
+            JOIN User u ON u.customer = p.customer
+            WHERE p.id = :policyId AND u.id = :userId
+            """)
+    Optional<Policy> findByIdAndOwnerUserId(@Param("policyId") Long policyId, @Param("userId") Long userId);
+
 }

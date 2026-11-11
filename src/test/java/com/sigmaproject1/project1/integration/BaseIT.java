@@ -1,6 +1,7 @@
 package com.sigmaproject1.project1.integration;
 
 import com.jayway.jsonpath.JsonPath;
+import com.sigmaproject1.project1.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,7 +9,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import com.sigmaproject1.project1.TestcontainersConfiguration;
 
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
-@WithMockUser(roles = "ADMIN")
+@WithJwtUser
 abstract class BaseIT {
     @Autowired
     protected MockMvc mockMvc;
@@ -111,5 +111,36 @@ abstract class BaseIT {
 
     long createClaim(long policyId, BigDecimal claimedAmount) throws Exception {
         return createClaim(policyId, "ok ok ok ok ok", "2021-05-20", claimedAmount);
+    }
+
+    // user -----
+    long createUser(String email, String password, Role role) throws Exception {
+        String userRequestBody = """
+                {
+                "email" : "%s",
+                "password" : "%s"
+                }
+                """.formatted(email, password);
+
+        String requestUrl = switch (role) {
+            case Role.ADMIN -> "/admin";
+            case Role.CLIENT -> "/client-link-customer";
+        };
+
+        String userResponse = mockMvc.perform(post("/users/register" + requestUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userRequestBody)
+                )
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return ((Number) JsonPath.read(userResponse, "$.id")).longValue();
+    }
+
+    long createAdminUser(String email) throws Exception {
+        return createUser(email, "password", Role.ADMIN);
+    }
+
+    long createClientUser(String email) throws Exception {
+        return createUser(email, "password", Role.CLIENT);
     }
 }

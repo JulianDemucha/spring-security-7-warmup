@@ -1,10 +1,12 @@
 package com.sigmaproject1.project1.service;
 
 import com.sigmaproject1.project1.dto.ClaimDto;
+import com.sigmaproject1.project1.security.UserContext;
 import com.sigmaproject1.project1.dto.request.ClaimCreationRequest;
 import com.sigmaproject1.project1.entity.Claim;
 import com.sigmaproject1.project1.entity.Policy;
 import com.sigmaproject1.project1.enums.ClaimStatus;
+import com.sigmaproject1.project1.enums.Role;
 import com.sigmaproject1.project1.exception.*;
 import com.sigmaproject1.project1.repository.ClaimRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +41,8 @@ public class ClaimServiceTest {
     private final Clock clock = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
 
     private ClaimService claimService;
+
+    private final UserContext adminUserContext = new UserContext(1L, List.of(Role.ADMIN));
 
     @BeforeEach
     void setUp() {
@@ -75,7 +80,7 @@ public class ClaimServiceTest {
 
             //Act and Assert
             assertThrows(IncidentOutsidePolicyPeriodException.class, () ->
-                claimService.createClaim(request)
+                claimService.createClaim(request, adminUserContext)
             );
         }
 
@@ -105,7 +110,7 @@ public class ClaimServiceTest {
 
             //Act and Assert
             assertThrows(IncidentOutsidePolicyPeriodException.class, () ->
-                claimService.createClaim(request)
+                claimService.createClaim(request, adminUserContext)
             );
 
             verify(claimRepository, never()).save(any());
@@ -140,7 +145,7 @@ public class ClaimServiceTest {
 
             //Act and Assert
             assertThrows(ClaimExceedsSumInsuredException.class, () ->
-                claimService.createClaim(request)
+                claimService.createClaim(request, adminUserContext)
             );
 
             verify(claimRepository, never()).save(any());
@@ -172,7 +177,7 @@ public class ClaimServiceTest {
             when(claimRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             //Act
-            claimService.createClaim(request);
+            claimService.createClaim(request, adminUserContext);
 
             //Assert
             verify(claimRepository).save(claimCaptor.capture());
@@ -197,7 +202,7 @@ public class ClaimServiceTest {
         //Act and Assert
         assertThrows(
                 ClaimNotFoundException.class,
-                () -> claimService.getClaimDto(1L)
+                () -> claimService.getClaimDto(1L, adminUserContext)
         );
     }
 

@@ -1,6 +1,8 @@
 package com.sigmaproject1.project1.controller;
 
 import com.sigmaproject1.project1.dto.ClaimDto;
+import com.sigmaproject1.project1.security.CurrentUser;
+import com.sigmaproject1.project1.security.UserContext;
 import com.sigmaproject1.project1.dto.request.ClaimCreationRequest;
 import com.sigmaproject1.project1.service.ClaimService;
 import jakarta.validation.Valid;
@@ -15,22 +17,24 @@ import org.springframework.web.bind.annotation.*;
 public class ClaimController {
     private final ClaimService claimService;
 
-    // todo: check if user is owner or admin
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/claims")
-    public ResponseEntity<ClaimDto> createClaim(@Valid @RequestBody final ClaimCreationRequest claimCreationRequest) {
+    public ResponseEntity<ClaimDto> createClaim(
+            @Valid @RequestBody final ClaimCreationRequest claimCreationRequest,
+            @CurrentUser final UserContext userContext
+    ) {
         return new ResponseEntity<>(
-                claimService.createClaim(claimCreationRequest),
+                claimService.createClaim(claimCreationRequest, userContext),
                 HttpStatus.CREATED
         );
     }
 
-    // todo: check if user is owner or admin
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/claims/{id}")
-    public ResponseEntity<ClaimDto> getClaim(@PathVariable final long id) {
+    public ResponseEntity<ClaimDto> getClaim(
+            @PathVariable final long id,
+            @CurrentUser final UserContext userContext
+    ) {
         return new ResponseEntity<>(
-                claimService.getClaimDto(id), HttpStatus.OK
+                claimService.getClaimDto(id, userContext), HttpStatus.OK
         );
     }
 
