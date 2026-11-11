@@ -36,3 +36,8 @@ spring:
     show-sql: true
   flyway:
     enabled: true
+
+springdoc:
+  swagger-ui:
+    csrf:
+      enabled: true
